@@ -30,7 +30,7 @@ jobs:
           MTASC_PATH=$(find . -type f -name mtasc -perm -u+x | head -n1)
           [ -n "$MTASC_PATH" ] || { echo "mtasc not found in archive"; exit 1; }
           sudo install -m 755 "$MTASC_PATH" /usr/local/bin/mtasc
-          mtasc -version
+          mtasc -help || true
 
       - name: Validate registry
         run: |
