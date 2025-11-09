@@ -47,14 +47,7 @@ jobs:
           swfmill simple dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
 
       - name: Inject AS2 (mtasc)
-        run: |
-          mtasc -version 8 \
-                -swf dist/ERF_UI.pre.swf \
-                -cp swf/as2 \
-                -cp tools/mtasc \            
-                -main Register \
-                -frame 1 \
-                -out dist/ERF_UI.swf
+        run: mtasc -version 8 -swf dist/ERF_UI.pre.swf -cp swf/as2 -cp /usr/local/lib/mtasc -main Register -frame 1 -out dist/ERF_UI.swf
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
