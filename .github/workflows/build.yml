@@ -19,29 +19,17 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y swfmill python3
 
-      - name: Install mtasc (manual download)
+      - name: Install mtasc (SourceForge community fork)
         run: |
           set -e
           TMP=$(mktemp -d)
           cd "$TMP"
-          URL="https://downloads.sourceforge.net/project/mtasc/mtasc/1.15/mtasc-1.15-linux-x86_64.tgz"
-          echo "Trying $URL"
-          if curl -fL --retry 3 --connect-timeout 30 "$URL" -o mtasc.tgz; then
-            tar -xzf mtasc.tgz || true
-          else
-            echo "Failed to download mtasc"
-            exit 1
-          fi
-
-          MTASC_PATH=$(find . -type f -name mtasc -maxdepth 1 -perm -u+x | head -n1 || true)
-          if [ -z "$MTASC_PATH" ]; then
-            echo "Could not find mtasc binary after download. Available files:"
-            find . -type f -name "*" -exec ls -la {} \; || true
-            exit 1
-          fi
-
-          sudo mv "$MTASC_PATH" /usr/local/bin/mtasc
-          sudo chmod +x /usr/local/bin/mtasc
+          curl -fL "https://sourceforge.net/projects/mtasc/files/mtasc-1.15-linux.tgz/download" -o mtasc.tgz
+          tar -xzf mtasc.tgz
+          # acha o binário dentro do tar e instala
+          MTASC_PATH=$(find . -type f -name mtasc -perm -u+x | head -n1)
+          [ -n "$MTASC_PATH" ] || { echo "mtasc not found in archive"; exit 1; }
+          sudo install -m 755 "$MTASC_PATH" /usr/local/bin/mtasc
           mtasc -version
 
       - name: Validate registry
