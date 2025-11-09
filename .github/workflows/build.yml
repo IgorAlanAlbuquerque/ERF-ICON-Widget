@@ -21,8 +21,7 @@ jobs:
 
       - name: Use bundled mtasc
         run: |
-          # binário
-          sudo install -m 755 tools/mtasc/bin/mtasc /usr/local/bin/mtasc
+          sudo install -m 755 tools/mtasc/mtasc /usr/local/bin/mtasc
 
           # headers (std)
           sudo mkdir -p /usr/local/lib/mtasc
