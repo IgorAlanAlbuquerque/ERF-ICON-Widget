@@ -36,9 +36,8 @@ jobs:
         run: chmod +x tools/mtasc/mtasc
 
       - name: Inject AS2
-        working-directory: tools/mtasc
         run: >
-          ./mtasc
+          tools/mtasc/mtasc
           -version 8
           -swf dist/ERF_UI.pre.swf
           -cp swf/as2
