@@ -23,14 +23,6 @@ jobs:
         run: |
           sudo install -m 755 tools/mtasc/mtasc /usr/local/bin/mtasc
 
-          # headers (std)
-          sudo mkdir -p /usr/local/lib/mtasc
-          # copie todas as variantes que você tem: std, std8, std9
-          [ -d tools/mtasc/std ]  && sudo cp -r tools/mtasc/std  /usr/local/lib/mtasc/std
-          [ -d tools/mtasc/std8 ] && sudo cp -r tools/mtasc/std8 /usr/local/lib/mtasc/std8
-          [ -d tools/mtasc/std9 ] && sudo cp -r tools/mtasc/std9 /usr/local/lib/mtasc/std9
-
-          # checagem simples
           mtasc -help >/dev/null || true
 
       - name: Validate registry
@@ -46,8 +38,21 @@ jobs:
           mkdir -p dist
           swfmill simple dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
 
+      - name: Check std presence
+        run: |
+          pwd
+          ls -la tools/mtasc || true
+          ls -la tools/mtasc/std || true
+
       - name: Inject AS2 (mtasc)
-        run: mtasc -version 8 -swf dist/ERF_UI.pre.swf -cp swf/as2 -cp /usr/local/lib/mtasc -main Register -frame 1 -out dist/ERF_UI.swf
+        run: >
+          mtasc -version 8
+          -swf dist/ERF_UI.pre.swf
+          -cp swf/as2
+          -cp tools/mtasc
+          -main Register
+          -frame 1
+          -out dist/ERF_UI.swf
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
