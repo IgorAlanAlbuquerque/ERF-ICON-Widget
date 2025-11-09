@@ -19,18 +19,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y swfmill python3
 
-      - name: Install mtasc (SourceForge community fork)
+      - name: Install mtasc
         run: |
           set -e
           TMP=$(mktemp -d)
           cd "$TMP"
           curl -fL "https://sourceforge.net/projects/mtasc/files/mtasc-1.15-linux-x86_64.tgz/download" -o mtasc.tgz
           tar -xzf mtasc.tgz
-          # acha o binário dentro do tar e instala
-          MTASC_PATH=$(find . -type f -name mtasc -perm -u+x | head -n1)
-          [ -n "$MTASC_PATH" ] || { echo "mtasc not found in archive"; exit 1; }
-          sudo install -m 755 "$MTASC_PATH" /usr/local/bin/mtasc
-          mtasc -help || true
+          ROOTDIR=$(find . -maxdepth 1 -type d -name "mtasc*" | head -n1)
+          [ -n "$ROOTDIR" ] || { echo "mtasc root dir not found"; exit 1; }
+          sudo install -m 755 "$ROOTDIR/mtasc" /usr/local/bin/mtasc
+          sudo mkdir -p /usr/local/lib/mtasc
+          sudo cp -r "$ROOTDIR/std" /usr/local/lib/mtasc/std
+          mtasc -help >/dev/null || true
 
       - name: Validate registry
         run: |
