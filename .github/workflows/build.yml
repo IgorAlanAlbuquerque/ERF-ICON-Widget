@@ -24,19 +24,19 @@ jobs:
           set -e
           TMP=$(mktemp -d)
           cd "$TMP"
-          URL="https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/mtasc/1.14-3build5/mtasc_1.14.orig.tar.gz"
+          URL="https://downloads.sourceforge.net/project/mtasc/mtasc/1.15/mtasc-1.15-linux-x86_64.tgz"
           echo "Trying $URL"
-          if curl -fL "$URL" -o mtasc.tar.gz; then
-            tar -xzf mtasc.tar.gz || true
+          if curl -fL "$URL" -o mtasc.tgz; then
+            tar -xzf mtasc.tgz || true
           else
             echo "Failed to download mtasc"
             exit 1
           fi
 
-          MTASC_PATH=$(find . -type f -name mtasc -path '*/bin/mtasc' -perm -u+x | head -n1 || true)
+          MTASC_PATH=$(find . -type f -name mtasc -maxdepth 1 -perm -u+x | head -n1 || true)
           if [ -z "$MTASC_PATH" ]; then
             echo "Could not find mtasc binary after download. Available files:"
-            find . -type f -name mtasc || true
+            find . -type f -name "*" -exec ls -la {} \; || true
             exit 1
           fi
 
