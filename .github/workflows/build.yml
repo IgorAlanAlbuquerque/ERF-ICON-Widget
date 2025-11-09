@@ -17,7 +17,33 @@ jobs:
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y swfmill mtasc python3
+          sudo apt-get install -y swfmill python3
+
+      - name: Install mtasc (manual download)
+        run: |
+          set -e
+          TMP=$(mktemp -d)
+          cd "$TMP"
+          for URL in \
+            "https://downloads.sourceforge.net/project/mtasc/mtasc/1.14/mtasc-1.14-linux.tgz" \
+            "https://downloads.sourceforge.net/project/mtasc/mtasc/1.14/mtasc-1.14-linux.tar.gz" \
+            ; do
+            echo "Trying $URL"
+            if curl -fL "$URL" -o mtasc.tgz; then
+              tar -xzf mtasc.tgz || true
+              break
+            fi
+          done
+
+          MTASC_PATH=$(find . -type f -name mtasc -perm -u+x | head -n1 || true)
+          if [ -z "$MTASC_PATH" ]; then
+            echo "Could not find mtasc binary after download"
+            exit 1
+          fi
+
+          sudo mv "$MTASC_PATH" /usr/local/bin/mtasc
+          sudo chmod +x /usr/local/bin/mtasc
+          mtasc -version
 
       - name: Validate registry
         run: |
@@ -25,7 +51,7 @@ jobs:
 
       - name: Generate XML
         run: |
-          python3 swf/build/generate_xml.py   # << sem "aqui"
+          python3 swf/build/generate_xml.py   
 
       - name: Build SWF (swfmill)
         run: |
