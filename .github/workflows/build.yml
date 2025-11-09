@@ -19,18 +19,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y swfmill python3
 
-      - name: Install mtasc
+      - name: Use bundled mtasc
         run: |
-          set -e
-          TMP=$(mktemp -d)
-          cd "$TMP"
-          curl -fL "https://sourceforge.net/projects/mtasc/files/mtasc-1.15-linux-x86_64.tgz/download" -o mtasc.tgz
-          tar -xzf mtasc.tgz
-          ROOTDIR=$(find . -maxdepth 1 -type d -name "mtasc*" | head -n1)
-          [ -n "$ROOTDIR" ] || { echo "mtasc root dir not found"; exit 1; }
-          sudo install -m 755 "$ROOTDIR/mtasc" /usr/local/bin/mtasc
+          # binário
+          sudo install -m 755 tools/mtasc/bin/mtasc /usr/local/bin/mtasc
+
+          # headers (std)
           sudo mkdir -p /usr/local/lib/mtasc
-          sudo cp -r "$ROOTDIR/std" /usr/local/lib/mtasc/std
+          # copie todas as variantes que você tem: std, std8, std9
+          [ -d tools/mtasc/std ]  && sudo cp -r tools/mtasc/std  /usr/local/lib/mtasc/std
+          [ -d tools/mtasc/std8 ] && sudo cp -r tools/mtasc/std8 /usr/local/lib/mtasc/std8
+          [ -d tools/mtasc/std9 ] && sudo cp -r tools/mtasc/std9 /usr/local/lib/mtasc/std9
+
+          # checagem simples
           mtasc -help >/dev/null || true
 
       - name: Validate registry
