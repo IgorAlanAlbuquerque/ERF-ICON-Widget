@@ -24,7 +24,7 @@ jobs:
           set -e
           TMP=$(mktemp -d)
           cd "$TMP"
-          curl -fL "https://sourceforge.net/projects/mtasc/files/mtasc-1.15-linux.tgz/download" -o mtasc.tgz
+          curl -fL "https://sourceforge.net/projects/mtasc/files/mtasc-1.15-linux-x86_64.tgz/download" -o mtasc.tgz
           tar -xzf mtasc.tgz
           # acha o binário dentro do tar e instala
           MTASC_PATH=$(find . -type f -name mtasc -perm -u+x | head -n1)
