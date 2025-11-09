@@ -4,20 +4,17 @@ class ERF_Gauge extends MovieClip
 {
   private var gauge_mc:MovieClip;
 
-  // ====== geometria/layout ======
   private var rOut:Number;
   private var strokePx:Number;
 
   private var _slotBaseOffsetX:Number;
   private var _slotScale:Number;
 
-  // ====== estado ======
   private var _ready:Boolean;
   private var _tried:Boolean;
 
   private var _slotMcs:Array;
 
-  // ================= ctor =================
   function ERF_Gauge()
   {
     rOut        = 7;
@@ -32,7 +29,6 @@ class ERF_Gauge extends MovieClip
     _slotMcs = [];
   }
 
-  // ---------- utils ----------
   private function _sum(a:Array):Number {
     var s:Number = 0;
     for (var i:Number = 0; i < a.length; ++i) {
@@ -75,7 +71,6 @@ class ERF_Gauge extends MovieClip
     mc.endFill();
   }
 
-  // ============ ciclo de vida ============
   public function onLoad():Void {
     var off:Number = rOut + 2;
 
@@ -100,7 +95,6 @@ class ERF_Gauge extends MovieClip
     return _ready;
   }
 
-  // ====== helpers de SLOT ======
   private function _ensureSlot(i:Number):MovieClip {
     if (_slotMcs[i]) return _slotMcs[i];
 
@@ -109,7 +103,7 @@ class ERF_Gauge extends MovieClip
     slot._xscale = slot._yscale = _slotScale * 100;
 
     slot.halo_mc     = slot.createEmptyMovieClip("halo_mc",     0);
-    slot.icon_mc     = slot.createEmptyMovieClip("icon_mc",     5);
+    slot.icon_mc     = slot.createEmptyMovieClip("icon_mc",    15); 
     slot.ring_bg_mc  = slot.createEmptyMovieClip("ring_bg_mc", 10);
     slot.ring_fg_mc  = slot.createEmptyMovieClip("ring_fg_mc", 20);
     slot.combo_mc    = slot.createEmptyMovieClip("combo_mc",   30);
@@ -122,7 +116,7 @@ class ERF_Gauge extends MovieClip
     return slot;
   }
 
-   private function _slotClear(slot:MovieClip):Void {
+  private function _slotClear(slot:MovieClip):Void {
     if (!slot) return;
     if (slot.ring_bg_mc) slot.ring_bg_mc.clear();
     if (slot.ring_fg_mc) slot.ring_fg_mc.clear();
@@ -139,6 +133,7 @@ class ERF_Gauge extends MovieClip
     }
   }
 
+  
   private function _applyIcon(slot:MovieClip, linkage:String):Void {
     if (!slot || !slot.icon_mc) return;
 
@@ -153,8 +148,7 @@ class ERF_Gauge extends MovieClip
       return;
     }
 
-    var child:MovieClip = null;
-    child = slot.icon_mc.attachMovie(linkage, "sym", 0);
+    var child:MovieClip = slot.icon_mc.attachMovie(linkage, "sym", slot.icon_mc.getNextHighestDepth());
     if (!child) {
       return;
     }
@@ -174,6 +168,8 @@ class ERF_Gauge extends MovieClip
 
     var k:Number = targetSize / Math.max(w, h);
     var pct:Number = k * 100;
+
+    pct = Math.min(pct, 100);
 
     child._xscale = child._yscale = pct;
 
@@ -231,10 +227,9 @@ class ERF_Gauge extends MovieClip
     slot._visible = true;
   }
 
-  // ============ API ============
   public function setAll(comboRemain01:Array, comboTints:Array,
-                       accumValues:Array, accumColors:Array, iconLinkages:Array,
-                       isSingle:Boolean, isHorin:Boolean, spacing:Number):Boolean
+                         accumValues:Array, accumColors:Array, iconLinkages:Array,
+                         isSingle:Boolean, isHorin:Boolean, spacing:Number):Boolean
   {
     if (!_ready) _tryInit();
 
@@ -261,7 +256,6 @@ class ERF_Gauge extends MovieClip
       return (iconLinkages && idx >= 0 && idx < iconLinkages.length) ? String(iconLinkages[idx]) : null;
     };
 
-    // ===== COMBOS =====
     for (var i:Number = 0; i < n; ++i) {
       var slot:MovieClip = _ensureSlot(i);
       _placeSlot(slot, i, isHorin, baseX, baseY, spacing);
@@ -278,7 +272,6 @@ class ERF_Gauge extends MovieClip
     var nextIndex:Number = n;
     var anyAccumDrawn:Boolean = false;
 
-    // ===== ACCUM =====
     var hasAccum:Boolean = false;
     if (accumValues != null) {
       var sum:Number = 0;
@@ -290,7 +283,6 @@ class ERF_Gauge extends MovieClip
 
     if (hasAccum) {
       if (isSingle) {
-        // --- SINGLE ---
         var m:Number = accumValues.length;
         var drawn:Number = 0;
         for (var k:Number = 0; k < m; ++k) {
@@ -301,7 +293,7 @@ class ERF_Gauge extends MovieClip
           if (frac < 0) frac = 0; else if (frac > 1) frac = 1;
 
           var col:Number = (accumColors && !isNaN(Number(accumColors[k])))
-                          ? Number(accumColors[k]) : 0xFFFFFF;
+                           ? Number(accumColors[k]) : 0xFFFFFF;
 
           var s:MovieClip = _ensureSlot(nextIndex + drawn);
           _placeSlot(s, nextIndex + drawn, isHorin, baseX, baseY, spacing);
@@ -315,7 +307,6 @@ class ERF_Gauge extends MovieClip
         }
         if (drawn > 0) { anyAccumDrawn = true; nextIndex += drawn; }
       } else {
-        // --- MIXED ---
         var aSlot:MovieClip = _ensureSlot(nextIndex);
         _placeSlot(aSlot, nextIndex, isHorin, baseX, baseY, spacing);
 
