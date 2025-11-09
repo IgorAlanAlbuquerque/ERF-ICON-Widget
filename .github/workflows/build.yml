@@ -21,9 +21,23 @@ jobs:
 
       - name: Use bundled mtasc
         run: |
+          set -e
+          echo "Workspace: $GITHUB_WORKSPACE"
+          ls -la tools/mtasc || true
+          ls -la tools/mtasc/std || true
+
+          file tools/mtasc/mtasc || true
+          chmod +x tools/mtasc/mtasc
+
           sudo install -m 755 tools/mtasc/mtasc /usr/local/bin/mtasc
 
-          mtasc -help >/dev/null || true
+          rm -rf std
+          rm -rf std8
+          rm -rf std9
+          cp -r tools/mtasc/std ./std
+          cp -r tools/mtasc/std8 ./std8
+          cp -r tools/mtasc/std9 ./std9
+          ls -la std | head -n 20
 
       - name: Validate registry
         run: |
@@ -48,8 +62,8 @@ jobs:
         run: >
           mtasc -version 8
           -swf dist/ERF_UI.pre.swf
-          -cp swf/as2
-          -cp tools/mtasc
+          -cp "${GITHUB_WORKSPACE}/swf/as2"
+          -cp "${GITHUB_WORKSPACE}"
           -main Register
           -frame 1
           -out dist/ERF_UI.swf
