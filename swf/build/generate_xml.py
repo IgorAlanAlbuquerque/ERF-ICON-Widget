@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import json, os, sys, glob
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ICONS = os.path.join(ROOT, "icons")
-REG   = os.path.join(ROOT, "registry")
-TEMPLATE = os.path.join(ROOT, "swf", "template.xml")
+DEFAULT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+ROOT = os.environ.get("GITHUB_WORKSPACE", DEFAULT_ROOT)
+
+ICONS    = os.path.join(ROOT, "icons")
+REG      = os.path.join(ROOT, "registry")
+TEMPLATE = os.path.join(ROOT, "swf", "template", "template.xml")  # opcional
 OUT_XML  = os.path.join(ROOT, "dist", "ERF_UI.generated.xml")
 
 def read_registry():
