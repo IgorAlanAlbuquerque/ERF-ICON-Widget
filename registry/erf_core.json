@@ -1,0 +1,17 @@
+{
+  "namespace": "erf_core",
+  "icons": [
+    {
+      "file": "icons/erf_core/fire.png",
+      "linkage": "ERF_ICON__erf_core__fire"
+    },
+    {
+      "file": "icons/erf_core/frost.png",
+      "linkage": "ERF_ICON__erf_core__frost"
+    },
+    {
+      "file": "icons/erf_core/shock.png",
+      "linkage": "ERF_ICON__erf_core__shock"
+    }
+  ]
+}
