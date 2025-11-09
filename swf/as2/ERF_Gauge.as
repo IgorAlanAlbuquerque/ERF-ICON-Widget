@@ -133,7 +133,6 @@ class ERF_Gauge extends MovieClip
     }
   }
 
-  
   private function _applyIcon(slot:MovieClip, linkage:String):Void {
     if (!slot || !slot.icon_mc) return;
 
@@ -145,32 +144,31 @@ class ERF_Gauge extends MovieClip
     slot.icon_mc.clear();
 
     if (!linkage || linkage == "" || linkage == undefined) {
+      return; 
+    }
+
+    var bmp:BitmapData = BitmapData.loadBitmap(linkage);
+    if (!bmp) {
       return;
     }
 
-    var child:MovieClip = slot.icon_mc.attachMovie(linkage, "sym", slot.icon_mc.getNextHighestDepth());
-    if (!child) {
-      return;
-    }
+    var child:MovieClip = slot.icon_mc.createEmptyMovieClip("sym", 0);
+    child.attachBitmap(bmp, 0, "auto", true);
 
     var pad:Number = 2;
     var innerR:Number = Math.max(0, rOut - strokePx - pad);
     var targetSize:Number = innerR * 2;
 
-    child._xscale = child._yscale = 100;
-
     var b:Object = child.getBounds(slot.icon_mc);
     var w:Number = (b.xMax - b.xMin);
     var h:Number = (b.yMax - b.yMin);
     if (w <= 0 || h <= 0) {
+      
       return;
     }
 
     var k:Number = targetSize / Math.max(w, h);
     var pct:Number = k * 100;
-
-    pct = Math.min(pct, 100);
-
     child._xscale = child._yscale = pct;
 
     b = child.getBounds(slot.icon_mc);
