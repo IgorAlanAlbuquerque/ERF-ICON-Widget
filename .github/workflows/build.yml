@@ -26,7 +26,7 @@ jobs:
           cd "$TMP"
           URL="https://downloads.sourceforge.net/project/mtasc/mtasc/1.15/mtasc-1.15-linux-x86_64.tgz"
           echo "Trying $URL"
-          if curl -fL "$URL" -o mtasc.tgz; then
+          if curl -fL --retry 3 --connect-timeout 30 "$URL" -o mtasc.tgz; then
             tar -xzf mtasc.tgz || true
           else
             echo "Failed to download mtasc"
