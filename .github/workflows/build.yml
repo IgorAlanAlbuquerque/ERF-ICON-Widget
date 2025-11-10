@@ -33,7 +33,7 @@ jobs:
           swfmill -v simple dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
 
       - name: Image verify on swfmill (pre)
-        run: swfmill swfdump dist/ERF_UI.pre.swf | grep ERF_ICON__
+        run: swfmill swf2xml dist/ERF_UI.pre.swf | grep -F 'ERF_ICON__'
 
       - name: Make mtasc executable
         run: chmod +x tools/mtasc/mtasc
@@ -50,7 +50,7 @@ jobs:
           -out dist/ERF_UI.swf
 
       - name: Image verify on mtasc (final)
-        run: swfmill swfdump dist/ERF_UI.swf | grep ERF_ICON__
+        run: swfmill swf2xml dist/ERF_UI.swf | grep -F 'ERF_ICON__'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
