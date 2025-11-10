@@ -1,78 +1,75 @@
-#!/usr/bin/env python3
 import json, os, sys, glob
 
 DEFAULT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 ROOT = os.environ.get("GITHUB_WORKSPACE", DEFAULT_ROOT)
 
-ICONS    = os.path.join(ROOT, "icons")
-REG      = os.path.join(ROOT, "registry")
-TEMPLATE = os.path.join(ROOT, "swf", "template", "template.xml")  # opcional
-OUT_XML  = os.path.join(ROOT, "dist", "ERF_UI.generated.xml")
+REG_DIR  = os.path.join(ROOT, "registry")         
+OUT_DIR  = os.path.join(ROOT, "dist")
+OUT_XML  = os.path.join(OUT_DIR, "ERF_UI.generated.xml")
 
 def read_registry():
+    """Lê todos os JSONs em /registry/*.json e retorna lista de {file, linkage}."""
     entries = []
-    for path in sorted(glob.glob(os.path.join(REG, "*.json"))):
+    paths = sorted(glob.glob(os.path.join(REG_DIR, "*.json")))
+    if not paths:
+        print(f"[WARN] no registry jsons found in {REG_DIR}", file=sys.stderr)
+    for path in paths:
         try:
             with open(path, "r", encoding="utf-8") as f:
                 j = json.load(f)
-            ns = j.get("namespace", "").strip()
+            
             for it in j.get("icons", []):
                 fpath   = it["file"]
                 linkage = it["linkage"]
-                entries.append({
-                    "file": fpath,
-                    "linkage": linkage
-                })
+                entries.append({"file": fpath, "linkage": linkage})
         except Exception as e:
             print(f"[WARN] skipping {path}: {e}", file=sys.stderr)
     return entries
 
+def normalize_assets(assets):
+    """Normaliza caminho dos arquivos e filtra os que existem."""
+    ok = []
+    for a in assets:
+        p = a["file"]
+        if not os.path.isabs(p):
+            p = os.path.normpath(os.path.join(ROOT, p))
+        if os.path.exists(p):
+            ok.append({"file": p, "linkage": a["linkage"]})
+        else:
+            print(f"[WARN] file not found: {p}", file=sys.stderr)
+    return ok
+
 def emit_simple_movie(assets):
-    # Gera um SWF (swfmill simple) com:
-    # - biblioteca: ERF_Gauge export
-    # - bitmaps + sprites exportados por linkage
+    """
+    Gera XML em 'simple syntax' do swfmill.
+    Exporta cada bitmap com 'export="<linkage>"' para permitir BitmapData.loadBitmap(linkage).
+    """
     xml = []
     xml.append('<?xml version="1.0" encoding="UTF-8"?>')
     xml.append('<movie width="256" height="256" framerate="60" version="8">')
     xml.append('  <library>')
+    
     xml.append('    <clip id="ERF_Gauge" export="ERF_Gauge"><frame/></clip>')
-    # Bitmaps + sprites
+
     for idx, a in enumerate(assets):
-        fid = f"bmp_{idx}"
-        sid = f"spr_{idx}"
-        # PNG direto
-        xml.append(f'    <bitmap id="{fid}" import="{a["file"]}"/>')
-        # Sprite que contém o bitmap
-        xml.append(f'    <clip id="{sid}"><frame><place id="{fid}"/></frame></clip>')
-        # Exporta o sprite com o linkage pedido
-        xml.append(f'    <export asset="{sid}" name="{a["linkage"]}"/>')
+        fid = f"ico_{idx}"  
+        
+        xml.append(f'    <bitmap id="{fid}" src="{a["file"]}" export="{a["linkage"]}"/>')
+
     xml.append('  </library>')
     xml.append('  <frame/>')
     xml.append('</movie>')
     return "\n".join(xml)
 
 def main():
-    os.makedirs(os.path.join(ROOT, "dist"), exist_ok=True)
-
+    os.makedirs(OUT_DIR, exist_ok=True)
     assets = read_registry()
-    # Normaliza caminhos relativos
-    for a in assets:
-        p = a["file"]
-        if not os.path.isabs(p):
-            a["file"] = os.path.normpath(os.path.join(ROOT, p))
+    assets = normalize_assets(assets)
 
-    # Avisos de inexistentes (não falha build; só avisa)
-    ok_assets = []
-    for a in assets:
-        if os.path.exists(a["file"]):
-            ok_assets.append(a)
-        else:
-            print(f"[WARN] file not found: {a['file']}", file=sys.stderr)
-
-    xml = emit_simple_movie(ok_assets)
+    xml = emit_simple_movie(assets)
     with open(OUT_XML, "w", encoding="utf-8") as f:
         f.write(xml)
-    print(f"[OK] wrote {OUT_XML} with {len(ok_assets)} assets")
+    print(f"[OK] wrote {OUT_XML} with {len(assets)} assets")
 
 if __name__ == "__main__":
     main()
