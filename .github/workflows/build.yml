@@ -25,12 +25,15 @@ jobs:
 
       - name: Generate XML
         run: |
-          python3 swf/build/generate_xml.py   
+          python3 swf/build/generate_xml.py
 
-      - name: Build SWF (swfmill)
+      - name: Build SWF (swfmill, verbose)
         run: |
           mkdir -p dist
-          swfmill simple dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
+          swfmill -v simple dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
+
+      - name: Image verify on swfmill (pre)
+        run: swfmill swfdump dist/ERF_UI.pre.swf | grep ERF_ICON__
 
       - name: Make mtasc executable
         run: chmod +x tools/mtasc/mtasc
@@ -43,7 +46,11 @@ jobs:
           -cp swf/as2
           -main Register
           -frame 1
+          -keep
           -out dist/ERF_UI.swf
+
+      - name: Image verify on mtasc (final)
+        run: swfmill swfdump dist/ERF_UI.swf | grep ERF_ICON__
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
