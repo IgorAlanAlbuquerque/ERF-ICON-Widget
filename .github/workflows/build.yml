@@ -29,7 +29,7 @@ jobs:
 
       - name: Build SWF
         run: |
-          swfmill xml2swf dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
+          swfmill simple dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
 
       - name: Image verify on swfmill (pre)
         run: swfmill swf2xml dist/ERF_UI.pre.swf | grep -F 'ERF_ICON__'

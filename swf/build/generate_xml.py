@@ -35,29 +35,27 @@ def emit_xml(assets):
     out = []
     out.append('<?xml version="1.0" encoding="UTF-8"?>')
     out.append('<movie width="256" height="256" framerate="60" version="8">')
-    out.append('  <library>')
-    out.append('    <clip id="ERF_Gauge" export="ERF_Gauge"><frame/></clip>')
+    out.append('  <frame>')
+    out.append('    <library>')
+
+    out.append('      <clip id="ERF_Gauge" export="ERF_Gauge"><frame/></clip>')
 
     for a in assets:
-        out.append(f'    <bitmap id="{a["linkage"]}" src="{rel_unix(a["file_abs"])}"/>')
+        out.append(
+            f'      <clip id="{a["linkage"]}" import="{rel_unix(a["file_abs"])}"/>'
+        )
 
-    out.append('    <clip id="ERF_IconDepot" export="ERF_IconDepot">')
-    out.append('      <frame>')
+    out.append('      <clip id="ERF_IconDepot" export="ERF_IconDepot">')
+    out.append('        <frame>')
     for idx, a in enumerate(assets):
         out.append(
-            f'        <place id="{a["linkage"]}" name="ic_{idx}" x="20000" y="20000" alpha="0"/>'
+            f'          <place id="{a["linkage"]}" name="ic_{idx}" x="20000" y="20000" alpha="0"/>'
         )
-    out.append('      </frame>')
-    out.append('    </clip>')
-    out.append('  </library>')
+    out.append('        </frame>')
+    out.append('      </clip>')
 
-    if assets:
-        out.append('  <export>')
-        for a in assets:
-            out.append(f'    <symbol id="{a["linkage"]}" name="{a["linkage"]}"/>')
-        out.append('  </export>')
-
-    out.append('  <frame/>')
+    out.append('    </library>')
+    out.append('  </frame>')
     out.append('</movie>')
     return "\n".join(out)
 
