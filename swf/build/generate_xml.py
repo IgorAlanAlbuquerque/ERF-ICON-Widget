@@ -8,7 +8,7 @@ OUT_DIR  = os.path.join(ROOT, "dist")
 OUT_XML  = os.path.join(OUT_DIR, "ERF_UI.generated.xml")
 
 def rel_unix(path_abs: str) -> str:
-    rel = os.path.relpath(path_abs, ROOT)
+    rel = os.path.relpath(path_abs, OUT_DIR)
     return rel.replace("\\", "/")
 
 def read_assets():
