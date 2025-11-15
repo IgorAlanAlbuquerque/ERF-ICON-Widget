@@ -42,7 +42,7 @@ def emit_xml(assets):
 
     for a in assets:
         out.append(
-            f'      <clip id="{a["linkage"]}" import="{rel_unix(a["file_abs"])}"/>'
+            f'      <clip id="{a["linkage"]}" export="{a["linkage"]}" import="{rel_unix(a["file_abs"])}"/>'
         )
 
     out.append('      <clip id="ERF_IconDepot" export="ERF_IconDepot">')

@@ -1,5 +1,3 @@
-import flash.display.BitmapData;
-
 class ERF_Gauge extends MovieClip
 {
   private var gauge_mc:MovieClip;
@@ -144,16 +142,13 @@ class ERF_Gauge extends MovieClip
     slot.icon_mc.clear();
 
     if (!linkage || linkage == "" || linkage == undefined) {
-      return; 
-    }
-
-    var bmp:BitmapData = BitmapData.loadBitmap(linkage);
-    if (!bmp) {
       return;
     }
 
-    var child:MovieClip = slot.icon_mc.createEmptyMovieClip("sym", 0);
-    child.attachBitmap(bmp, 0, "auto", true);
+    var child:MovieClip = slot.icon_mc.attachMovie(linkage, "sym", 0);
+    if (!child) {
+      return;
+    }
 
     var pad:Number = 2;
     var innerR:Number = Math.max(0, rOut - strokePx - pad);
@@ -163,7 +158,6 @@ class ERF_Gauge extends MovieClip
     var w:Number = (b.xMax - b.xMin);
     var h:Number = (b.yMax - b.yMin);
     if (w <= 0 || h <= 0) {
-      
       return;
     }
 
