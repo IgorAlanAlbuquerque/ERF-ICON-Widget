@@ -27,10 +27,9 @@ jobs:
         run: |
           python3 swf/build/generate_xml.py
 
-      - name: Build SWF (swfmill, verbose)
+      - name: Build SWF
         run: |
-          mkdir -p dist
-          swfmill -v simple dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
+          swfmill xml2swf dist/ERF_UI.generated.xml dist/ERF_UI.pre.swf
 
       - name: Image verify on swfmill (pre)
         run: swfmill swf2xml dist/ERF_UI.pre.swf | grep -F 'ERF_ICON__'
