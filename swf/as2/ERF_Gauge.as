@@ -225,6 +225,11 @@ class ERF_Gauge extends MovieClip
   {
     if (!_ready) _tryInit();
 
+    var dbg:MovieClip = this.createEmptyMovieClip("dbg_icon", 9999);
+    dbg._x = 0;
+    dbg._y = 0;
+    var c:MovieClip = dbg.attachMovie("ERF_ICON__erf_core__fire", "sym", 0);
+
     if (isNaN(spacing)) spacing = 40;
 
     var n:Number = (comboRemain01 != null) ? comboRemain01.length : 0;
