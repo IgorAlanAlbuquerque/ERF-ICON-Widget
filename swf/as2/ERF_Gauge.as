@@ -150,7 +150,7 @@ class ERF_Gauge extends MovieClip
       return;
     }
 
-    var pad:Number = 2;
+    var pad:Number = 1;
     var innerR:Number = Math.max(0, rOut - strokePx - pad);
     var targetSize:Number = innerR * 2;
 
@@ -224,11 +224,6 @@ class ERF_Gauge extends MovieClip
                          isSingle:Boolean, isHorin:Boolean, spacing:Number):Boolean
   {
     if (!_ready) _tryInit();
-
-    var dbg:MovieClip = this.createEmptyMovieClip("dbg_icon", 9999);
-    dbg._x = 0;
-    dbg._y = 0;
-    var c:MovieClip = dbg.attachMovie("ERF_ICON__erf_core__fire", "sym", 0);
 
     if (isNaN(spacing)) spacing = 40;
 
