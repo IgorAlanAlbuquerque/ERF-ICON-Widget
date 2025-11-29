@@ -220,8 +220,9 @@ class ERF_Gauge extends MovieClip
   }
 
   public function setAll(comboRemain01:Array, comboTints:Array,
-                         accumValues:Array, accumColors:Array, iconLinkages:Array,
-                         isSingle:Boolean, isHorin:Boolean, spacing:Number):Boolean
+                       accumValues:Array, accumColors:Array, iconLinkages:Array,
+                       isSingle:Boolean, isHorin:Boolean, spacing:Number,
+                       singlesBefore:Number, singlesAfter:Number):Boolean
   {
     if (!_ready) _tryInit();
 
@@ -253,7 +254,7 @@ class ERF_Gauge extends MovieClip
       _placeSlot(slot, i, isHorin, baseX, baseY, spacing);
 
       _slotClear(slot);
-      _applyIcon(slot, iconAt(i));
+      _applyIcon(slot, iconAt(i));  
 
       var remain:Number = Number(comboRemain01[i]);
       var tint:Number   = Number(comboTints[i]);
@@ -261,31 +262,51 @@ class ERF_Gauge extends MovieClip
       slot._visible = true;
     }
 
-    var nextIndex:Number = n;
+    var nextIndex:Number = n;            
     var anyAccumDrawn:Boolean = false;
 
     var hasAccum:Boolean = false;
     if (accumValues != null) {
       var sum:Number = 0;
       for (var si:Number = 0; si < accumValues.length; ++si) {
-        var vv:Number = Number(accumValues[si]); if (!isNaN(vv)) sum += vv;
+        var vv:Number = Number(accumValues[si]);
+        if (!isNaN(vv)) sum += vv;
       }
       hasAccum = (sum > 0);
     }
 
-    if (hasAccum) {
+    if (hasAccum && accumValues != null) {
+      var totalAccum:Number = accumValues.length;
+      if (totalAccum < 0) totalAccum = 0;
+
+      var sb:Number = (singlesBefore == null) ? 0 : Number(singlesBefore);
+      var sa:Number = (singlesAfter == null) ? 0 : Number(singlesAfter);
+
+      if (isNaN(sb)) sb = 0;
+      if (isNaN(sa)) sa = 0;
+      if (sb < 0) sb = 0;
+      if (sa < 0) sa = 0;
+      if (sb > totalAccum) sb = totalAccum;
+      if (sa > totalAccum - sb) sa = totalAccum - sb;
+
+      var midStart:Number = sb;
+      var midEnd:Number   = totalAccum - sa;
+      if (midEnd < midStart) midEnd = midStart; 
+
       if (isSingle) {
-        var m:Number = accumValues.length;
+        var m:Number = totalAccum;
         var drawn:Number = 0;
+
         for (var k:Number = 0; k < m; ++k) {
           var v:Number = Number(accumValues[k]);
           if (isNaN(v) || v <= 0) continue;
 
           var frac:Number = v / 100.0;
-          if (frac < 0) frac = 0; else if (frac > 1) frac = 1;
+          if (frac < 0) frac = 0;
+          else if (frac > 1) frac = 1;
 
           var col:Number = (accumColors && !isNaN(Number(accumColors[k])))
-                           ? Number(accumColors[k]) : 0xFFFFFF;
+                          ? Number(accumColors[k]) : 0xFFFFFF;
 
           var s:MovieClip = _ensureSlot(nextIndex + drawn);
           _placeSlot(s, nextIndex + drawn, isHorin, baseX, baseY, spacing);
@@ -297,18 +318,90 @@ class ERF_Gauge extends MovieClip
 
           drawn++;
         }
-        if (drawn > 0) { anyAccumDrawn = true; nextIndex += drawn; }
+
+        if (drawn > 0) {
+          anyAccumDrawn = true;
+          nextIndex += drawn;
+        }
+
       } else {
-        var aSlot:MovieClip = _ensureSlot(nextIndex);
-        _placeSlot(aSlot, nextIndex, isHorin, baseX, baseY, spacing);
+        var gaugeIdx:Number = 0;  
 
-        _slotClear(aSlot);
-        _applyIcon(aSlot, iconAt(nextIndex));
-        _slotDrawAccum(aSlot, accumValues, accumColors);
-        aSlot._visible = true;
+        for (var iB:Number = 0; iB < sb; ++iB) {
+          var vB:Number = Number(accumValues[iB]);
+          if (isNaN(vB) || vB <= 0) continue;  
 
-        anyAccumDrawn = true;
-        nextIndex += 1;
+          var fracB:Number = vB / 100.0;
+          if (fracB < 0) fracB = 0;
+          else if (fracB > 1) fracB = 1;
+
+          var colB:Number = (accumColors && !isNaN(Number(accumColors[iB])))
+                            ? Number(accumColors[iB]) : 0xFFFFFF;
+
+          var sB:MovieClip = _ensureSlot(nextIndex + gaugeIdx);
+          _placeSlot(sB, nextIndex + gaugeIdx, isHorin, baseX, baseY, spacing);
+
+          _slotClear(sB);
+          _applyIcon(sB, iconAt(nextIndex + gaugeIdx)); 
+          _slotDrawCombo(sB, fracB, colB);
+          sB._visible = true;
+
+          gaugeIdx++;
+        }
+
+        if (midStart < midEnd) {
+          var mSlot:MovieClip = _ensureSlot(nextIndex + gaugeIdx);
+          _placeSlot(mSlot, nextIndex + gaugeIdx, isHorin, baseX, baseY, spacing);
+
+          _slotClear(mSlot);
+          _applyIcon(mSlot, iconAt(nextIndex + gaugeIdx)); 
+
+          var segVals:Array = [];
+          var segCols:Array = [];
+
+          for (var mi:Number = midStart; mi < midEnd; ++mi) {
+            var vM:Number = Number(accumValues[mi]);
+            if (isNaN(vM) || vM <= 0) continue; 
+
+            segVals.push(vM);
+
+            var colM:Number = (accumColors && !isNaN(Number(accumColors[mi])))
+                              ? Number(accumColors[mi]) : 0xFFFFFF;
+            segCols.push(colM);
+          }
+
+          _slotDrawAccum(mSlot, segVals, segCols);
+          mSlot._visible = true;
+
+          gaugeIdx++;
+        }
+
+        for (var iA:Number = midEnd; iA < totalAccum; ++iA) {
+          var vA:Number = Number(accumValues[iA]);
+          if (isNaN(vA) || vA <= 0) continue;
+
+          var fracA:Number = vA / 100.0;
+          if (fracA < 0) fracA = 0;
+          else if (fracA > 1) fracA = 1;
+
+          var colA:Number = (accumColors && !isNaN(Number(accumColors[iA])))
+                            ? Number(accumColors[iA]) : 0xFFFFFF;
+
+          var sA:MovieClip = _ensureSlot(nextIndex + gaugeIdx);
+          _placeSlot(sA, nextIndex + gaugeIdx, isHorin, baseX, baseY, spacing);
+
+          _slotClear(sA);
+          _applyIcon(sA, iconAt(nextIndex + gaugeIdx)); 
+          _slotDrawCombo(sA, fracA, colA);
+          sA._visible = true;
+
+          gaugeIdx++;
+        }
+
+        if (gaugeIdx > 0) {
+          anyAccumDrawn = true;
+          nextIndex += gaugeIdx;
+        }
       }
     }
 

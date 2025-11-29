@@ -12,6 +12,10 @@
     {
       "file": "icons/erf_core/shock.png",
       "linkage": "ERF_ICON__erf_core__shock"
+    },
+    {
+      "file": "icons/erf_core/fallback.png",
+      "linkage": "ERF_ICON__erf_core_fallback"
     }
   ]
 }
