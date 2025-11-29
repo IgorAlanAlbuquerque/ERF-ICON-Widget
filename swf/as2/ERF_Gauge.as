@@ -268,15 +268,11 @@ class ERF_Gauge extends MovieClip
       slot._visible = true;
     }
 
-    var nextIndex:Number = n;
+    var nextIndex:Number = n;        // índice de slot HUD (combos já ocupam 0..n-1)
     var anyAccumDrawn:Boolean = false;
 
-    // --- CHECAR SE TEM ALGUM VALOR DE GAUGE ---
-    var totalAccum:Number = 0;
-    if (accumValues != null) {
-      totalAccum = accumValues.length;
-    }
-
+    // checar se tem algo pra desenhar em accumValues
+    var totalAccum:Number = (accumValues != null) ? accumValues.length : 0;
     var hasAccum:Boolean = false;
     if (totalAccum > 0) {
       var sum:Number = 0;
@@ -287,38 +283,30 @@ class ERF_Gauge extends MovieClip
       hasAccum = (sum > 0);
     }
 
-    // Ícones de gauges começam depois dos combos
+    // ícones dos gauges começam a partir de n (combos usam 0..n-1)
     var gaugeIconIdx:Number = n;
 
-    var v:Number;
-    var frac:Number;
-    var col:Number;
-    var s:MovieClip;
-
     if (hasAccum) {
-
       if (isSingle) {
-        // === MODO SINGLE: 1 GAUGE POR ELEMENTO ===
+        // === SINGLE: 1 gauge por elemento ===
         for (var k:Number = 0; k < totalAccum; ++k) {
-          v = Number(accumValues[k]);
-          if (isNaN(v) || v <= 0) {
-            continue;
-          }
+          var v:Number = Number(accumValues[k]);
+          if (isNaN(v) || v <= 0) continue;
 
-          frac = v / 100.0;
+          var frac:Number = v / 100.0;
           if (frac < 0) frac = 0;
           else if (frac > 1) frac = 1;
 
-          col = 0xFFFFFF;
+          var col:Number = 0xFFFFFF;
           if (accumColors && k < accumColors.length && !isNaN(Number(accumColors[k]))) {
             col = Number(accumColors[k]);
           }
 
-          s = _ensureSlot(nextIndex);
+          var s:MovieClip = _ensureSlot(nextIndex);
           _placeSlot(s, nextIndex, isHorin, baseX, baseY, spacing);
 
           _slotClear(s);
-          _applyIcon(s, iconAt(gaugeIconIdx));
+          _applyIcon(s, iconAt(gaugeIconIdx));   // ícone do gauge k
           _slotDrawCombo(s, frac, col);
           s._visible = true;
 
@@ -328,16 +316,11 @@ class ERF_Gauge extends MovieClip
         }
 
       } else {
-        // === MODO MIXED COM ELEMENTOS ISOLÁVEIS ===
+        // === MIXED NOVO: singlesBefore | MIX | singlesAfter ===
 
-        var nb:Number = (isNaN(singlesBefore) || singlesBefore < 0) ? 0 : singlesBefore;
-        var na:Number = (isNaN(singlesAfter)  || singlesAfter < 0)  ? 0 : singlesAfter;
+        var nb:Number = (isNaN(singlesBefore) || singlesBefore < 0) ? 0 : Math.floor(singlesBefore);
+        var na:Number = (isNaN(singlesAfter)  || singlesAfter < 0)  ? 0 : Math.floor(singlesAfter);
 
-        // forçar pro “inteiro” mais próximo pra baixo
-        nb = Math.floor(nb);
-        na = Math.floor(na);
-
-        // clamp pra não estourar totalAccum
         if (nb > totalAccum) nb = totalAccum;
         if (na > totalAccum - nb) na = totalAccum - nb;
 
@@ -345,6 +328,8 @@ class ERF_Gauge extends MovieClip
 
         // --- 1) GAUGES INDIVIDUAIS ANTES DO MISTO ---
         var iB:Number;
+        var v:Number, frac:Number, col:Number, s:MovieClip;
+
         for (iB = 0; iB < nb; ++iB) {
           v = Number(accumValues[iB]);
           if (!isNaN(v) && v > 0) {
@@ -361,19 +346,19 @@ class ERF_Gauge extends MovieClip
             _placeSlot(s, nextIndex, isHorin, baseX, baseY, spacing);
 
             _slotClear(s);
-            _applyIcon(s, iconAt(gaugeIconIdx));
+            _applyIcon(s, iconAt(gaugeIconIdx)); // ícone do gauge individual BEFORE
             _slotDrawCombo(s, frac, col);
             s._visible = true;
 
             anyAccumDrawn = true;
           }
 
-          // mesmo se v <= 0, avançamos o layout
+          // mesmo se v <= 0, avançamos layout e ícones
           nextIndex++;
           gaugeIconIdx++;
         }
 
-        // --- 2) GAUGE MISTO (MEIO), SE TIVER ALGUM MIX ---
+        // --- 2) GAUGE MISTO (MEIO) ---
         if (mixCount > 0) {
           var mixStart:Number = nb;
           var mixEnd:Number   = totalAccum - na; // exclusivo
@@ -400,7 +385,7 @@ class ERF_Gauge extends MovieClip
             _placeSlot(aSlot, nextIndex, isHorin, baseX, baseY, spacing);
 
             _slotClear(aSlot);
-            _applyIcon(aSlot, iconAt(gaugeIconIdx));
+            _applyIcon(aSlot, iconAt(gaugeIconIdx)); // ícone do gauge MISTO
             _slotDrawAccum(aSlot, mixVals, mixCols);
             aSlot._visible = true;
 
@@ -415,6 +400,7 @@ class ERF_Gauge extends MovieClip
         if (na > 0) {
           var afterStart:Number = totalAccum - na;
           var iA:Number;
+
           for (iA = 0; iA < na; ++iA) {
             var idxA:Number = afterStart + iA;
             v = Number(accumValues[idxA]);
@@ -432,7 +418,7 @@ class ERF_Gauge extends MovieClip
               _placeSlot(s, nextIndex, isHorin, baseX, baseY, spacing);
 
               _slotClear(s);
-              _applyIcon(s, iconAt(gaugeIconIdx));
+              _applyIcon(s, iconAt(gaugeIconIdx)); // ícone do gauge individual AFTER
               _slotDrawCombo(s, frac, col);
               s._visible = true;
 
